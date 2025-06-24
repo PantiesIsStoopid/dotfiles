@@ -1,57 +1,73 @@
+# Set the directory we want to store zinit and plugins
+ZinitHome="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+
+# Download Zinit, if it's not there yet
+if [ ! -d "$ZinitHome" ]; then
+  mkdir -p "$(dirname "$ZinitHome")"
+  git clone https://github.com/zdharma-continuum/zinit.git "$ZinitHome"
+fi
+
+# Source/Load zinit
+source "${ZinitHome}/zinit.zsh"
+
+export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1E1E2E,spinner:#F5E0DC,hl:#F38BA8,fg:#CDD6F4,header:#F38BA8,info:#CBA6F7,pointer:#F5E0DC,marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8,selected-bg:#45475A,border:#313244,label:#CDD6F4"
+
+# Add in zsh plugins
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
+zinit light Aloxaf/fzf-tab
+
+# Add in snippets
+zinit snippet OMZL::git.zsh
+zinit snippet OMZP::git
+zinit snippet OMZP::sudo
+zinit snippet OMZP::archlinux
+zinit snippet OMZP::aws
+zinit snippet OMZP::kubectl
+zinit snippet OMZP::kubectx
+zinit snippet OMZP::command-not-found
+
+# Load completions
+autoload -Uz compinit && compinit
+
+zinit cdreplay -q
+
+# Oh My Posh Setup
+eval "$(/usr/bin/oh-my-posh init zsh --config 'https://raw.githubusercontent.com/PantiesIsStoopid/PowerShell/main/Catppuccin.omp.json')"
+
+# Keybindings
+bindkey -e
+bindkey '^p' history-search-backward
+bindkey '^n' history-search-forward
+bindkey '^[w' kill-region
+
 # History
-HISTFILE=~/.config/zsh/.histfile
-HISTSIZE=5000
-SAVEHIST=100000
+HistSize=5000
+HistFile=$HOME/.zsh_history
+SaveHist=$HistSize
+HistDup=erase
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
 
-# Options
-setopt autocd extendedglob
-unsetopt beep
-bindkey -v
-
-# Path for custom binaries (adjust if needed)
-export PATH=$PATH:/usr/bin
-
-# Catppuccin Mocha colors
-local USER='%F{204}'     # Peach
-local AT='%F{166}'       # Maroon
-local HOST='%F{175}'     # Mauve
-local PATHCOLOR='%F{141}'# Rose
-local DOLLAR='%F{244}'   # Grey
-
-# Prompt
-PROMPT="${USER}%n${AT}@${HOST}%m${DOLLAR}:${PATHCOLOR}%~${DOLLAR} $ %f"
-RPROMPT='%F{244}$(date +%H:%M)%f'
-
-# Oh My Posh (replace path if different)
-if command -v oh-my-posh >/dev/null 2>&1; then
-  eval "$(/usr/bin/oh-my-posh init zsh --config 'https://raw.githubusercontent.com/PantiesIsStoopid/PowerShell/main/Catppuccin.omp.json')"
-fi
-
-# zoxide (faster cd)
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh --no-aliases)"
-fi
-
-# fzf (fuzzy finder)
-if [ -f ~/.fzf.zsh ]; then
-  source ~/.fzf.zsh
-fi
-
-# Git prompt and completion (if installed)
-if command -v git >/dev/null 2>&1; then
-  source /usr/share/git/git-prompt.sh 2>/dev/null || true
-  source /usr/share/git/completion/git-completion.zsh 2>/dev/null || true
-fi
-
-# Zsh Autosuggestions (install from https://github.com/zsh-users/zsh-autosuggestions)
-if [ -f ~/.zsh/zsh-autosuggestions.zsh ]; then
-  source ~/.zsh/zsh-autosuggestions.zsh
-fi
-
-# Zsh Syntax Highlighting (install from https://github.com/zsh-users/zsh-syntax-highlighting)
-if [ -f ~/.zsh/zsh-syntax-highlighting.zsh ]; then
-  source ~/.zsh/zsh-syntax-highlighting.zsh
-fi
+# Completion styling
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 # Aliases
-alias ll='ls -alF'
+alias Ls='ls --color'
+alias Vim='nvim'
+alias C='clear'
+
+# Shell integrations
+eval "$(fzf --zsh)"
+eval "$(zoxide init --cmd cd zsh)"
+
